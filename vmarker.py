@@ -51,10 +51,10 @@ class vmarker:
         aruco = cv2.aruco
         self.dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
         #self.startvideo()
+        self.mnum = markernum
         self.setmarker(markerpos_file)
         self.K = K
         self.dist = dist
-        self.mnum = markernum
         self.tvecs = []
         self.rvecs = []
         self.R = []
@@ -62,6 +62,7 @@ class vmarker:
     def setmarker(self,fname):
         #self.objp = np.zeros((markernum,3), np.float32)
         self.objp = np.loadtxt(fname,delimiter=",")
+        self.mnum,_ = self.objp.shape
     
     def startvideo(self,vnum=0):
         self.cap = cv2.VideoCapture(0)
@@ -116,17 +117,14 @@ if __name__=='__main__':
     # load camera matrix and distort matrix
     K = np.loadtxt("calib_usb/K.csv",delimiter=",")
     dist_coef = np.loadtxt('calib_usb/d.csv',delimiter=",")
-    vm = vmarker(K=K,dist=dist_coef)
+    vm = vmarker(K=K,dist=dist_coef,markerpos_file="markers1to4.csv")
     try:
         while ~cap.isOpened():
             ok,frame = cap.read()
             nframe = cv2.undistort(frame, K, dist_coef)
-            #detect = detect_marker(frame)
-            #cv2.imshow("detected",detect)
-            #cv2.waitKey(1)
             tv = vm.getcamerapose(frame)
             print(tv)
-            #print(vm.R)
+            #print(vm.rvec) #euler angle
 
     except KeyboardInterrupt:
         print("Finish Program!")
