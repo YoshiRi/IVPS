@@ -62,7 +62,8 @@ class vmarker:
     def setmarker(self,fname):
         #self.objp = np.zeros((markernum,3), np.float32)
         self.objp = np.loadtxt(fname,delimiter=",")
-        self.mnum,_ = self.objp.shape
+        self.mnum , _ = self.objp.shape
+        print(self.mnum)
     
     def startvideo(self,vnum=0):
         self.cap = cv2.VideoCapture(0)
