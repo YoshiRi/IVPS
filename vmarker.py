@@ -99,8 +99,8 @@ class vmarker:
             cv2.waitKey(1)
             return []
 
-    def draw(self,img, corners, imgpts):
-        corner = tuple(corners[0].ravel())
+    def draw(self,img, origin, imgpts):
+        corner = tuple(origin[0].ravel())
         img = cv2.line(img, corner, tuple(imgpts[0].ravel()), (255,0,0), 5)
         img = cv2.line(img, corner, tuple(imgpts[1].ravel()), (0,255,0), 5)
         img = cv2.line(img, corner, tuple(imgpts[2].ravel()), (0,0,255), 5)
@@ -108,8 +108,10 @@ class vmarker:
 
     def drawaxis(self,frame):#30cm cube
         self.axis = np.float32([[0.3,0,0], [0,0.3,0], [0,0,0.3]]).reshape(-1,3)
+        self.origin = np.float32([[0,0,0]]).reshape(-1,3)
         imgpts, jac = cv2.projectPoints(self.axis, self.rvecs, self.tvecs, self.K, self.dist)
-        img = self.draw(frame,self.ccorners,imgpts)
+        imgorgs, _ = cv2.projectPoints(self.origin, self.rvecs, self.tvecs, self.K, self.dist)
+        img = self.draw(frame,imgorgs,imgpts)
         cv2.imshow('projected',img)
         cv2.waitKey(1)
 
