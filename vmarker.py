@@ -57,6 +57,7 @@ class vmarker:
         self.mnum = markernum
         self.tvecs = []
         self.rvecs = []
+        self.R = []
     
     def setmarker(self,fname):
         #self.objp = np.zeros((markernum,3), np.float32)
@@ -88,7 +89,8 @@ class vmarker:
             # Find the rotation and translation vectors.
             _, self.rvecs, self.tvecs, inliers = cv2.solvePnPRansac(self.objp, self.ccorners, self.K, self.dist)
             self.drawaxis(aruco.drawDetectedMarkers(frame,corners,ids)) # draw origin
-            return -np.dot(eulerAnglesToRotationMatrix(self.rvecs).T,self.tvecs)
+            self.R = eulerAnglesToRotationMatrix(self.rvecs)
+            return -np.dot(self.R.T,self.tvecs)
 
         else:
             cv2.imshow('projected',aruco.drawDetectedMarkers(frame,corners,ids))
@@ -123,8 +125,8 @@ if __name__=='__main__':
             #cv2.imshow("detected",detect)
             #cv2.waitKey(1)
             tv = vm.getcamerapose(frame)
-            print(vm.rvecs)
-            #print(vm.tvecs)
+            print(tv)
+            #print(vm.R)
 
     except KeyboardInterrupt:
         print("Finish Program!")

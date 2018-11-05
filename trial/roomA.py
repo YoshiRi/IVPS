@@ -17,7 +17,7 @@ if __name__=='__main__':
     # load camera matrix and distort matrix
     K = np.loadtxt("../calib_usb/K.csv",delimiter=",")
     dist_coef = np.loadtxt('../calib_usb/d.csv',delimiter=",")
-    vm = vmarker(markernum=4,K=K,dist=dist_coef,markerpos_file="roomA.csv")
+    vm = vmarker(markernum=4,K=K,dist=dist_coef,markerpos_file="roomA_r.csv")
     try:
         while ~cap.isOpened():
             ok,frame = cap.read()
