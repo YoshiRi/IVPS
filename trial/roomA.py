@@ -11,6 +11,22 @@ sys.path.append("../")
 
 from vmarker import *
 
+def red_detect(img):
+    # HSV色空間に変換
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    # 赤色のHSVの値域1
+    hsv_min = np.array([0,127,0])
+    hsv_max = np.array([30,255,255])
+    mask1 = cv2.inRange(hsv, hsv_min, hsv_max)
+
+    # 赤色のHSVの値域2
+    hsv_min = np.array([150,127,0])
+    hsv_max = np.array([179,255,255])
+    mask2 = cv2.inRange(hsv, hsv_min, hsv_max)
+    
+    return mask1 + mask2
+
 
 if __name__=='__main__':
     cap = cv2.VideoCapture(0)
@@ -21,9 +37,12 @@ if __name__=='__main__':
     try:
         while ~cap.isOpened():
             ok,frame = cap.read()
-            nframe = cv2.undistort(frame, K, dist_coef)
+            #nframe = cv2.undistort(frame, K, dist_coef)
+            mask = red_detect(frame)
+            cv2.imshow("mask",mask)
             tv = vm.getcamerapose(frame)
             print(tv)
+            
 
     except KeyboardInterrupt:
         print("Finish Program!")
