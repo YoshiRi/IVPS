@@ -4,6 +4,7 @@
 
 import cv2
 import numpy as np
+import math
 
 def create_marker(mnum,imsize=200):
     aruco = cv2.aruco
@@ -21,17 +22,43 @@ def detect_marker(frame):
     dimage = aruco.drawDetectedMarkers(frame,corners)
     return dimage
 
+def eulerAnglesToRotationMatrix(theta) :
+     
+    R_x = np.array([[1,         0,                  0                   ],
+                    [0,         math.cos(theta[0]), -math.sin(theta[0]) ],
+                    [0,         math.sin(theta[0]), math.cos(theta[0])  ]
+                    ])
+         
+         
+                     
+    R_y = np.array([[math.cos(theta[1]),    0,      math.sin(theta[1])  ],
+                    [0,                     1,      0                   ],
+                    [-math.sin(theta[1]),   0,      math.cos(theta[1])  ]
+                    ])
+                 
+    R_z = np.array([[math.cos(theta[2]),    -math.sin(theta[2]),    0],
+                    [math.sin(theta[2]),    math.cos(theta[2]),     0],
+                    [0,                     0,                      1]
+                    ])
+                     
+                     
+    R = np.dot(R_z, np.dot( R_y, R_x ))
+ 
+    return R
+
 class vmarker:
-    def __init__(self,markernum=5,K=[],dist=[]):
+    def __init__(self,markernum=5,K=[],dist=[],markerpos_file="mpos1.csv"):
         aruco = cv2.aruco
         self.dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
         #self.startvideo()
-        self.setmarker()
+        self.setmarker(markerpos_file)
         self.K = K
         self.dist = dist
         self.mnum = markernum
+        self.tvecs = []
+        self.rvecs = []
     
-    def setmarker(self,fname="mpos1.csv"):
+    def setmarker(self,fname):
         #self.objp = np.zeros((markernum,3), np.float32)
         self.objp = np.loadtxt(fname,delimiter=",")
     
@@ -56,15 +83,17 @@ class vmarker:
                 centercorners.append(np.average(corner,1))
                 
             self.ccorners = np.array(centercorners).reshape(self.mnum,1,2)
-            print(self.ccorners)
+            #print(self.ccorners)
 
             # Find the rotation and translation vectors.
             _, self.rvecs, self.tvecs, inliers = cv2.solvePnPRansac(self.objp, self.ccorners, self.K, self.dist)
-            self.drawaxis(aruco.drawDetectedMarkers(frame,corners,ids))
-        
+            self.drawaxis(aruco.drawDetectedMarkers(frame,corners,ids)) # draw origin
+            return -np.dot(eulerAnglesToRotationMatrix(self.rvecs).T,self.tvecs)
+
         else:
             cv2.imshow('projected',aruco.drawDetectedMarkers(frame,corners,ids))
             cv2.waitKey(1)
+            return []
 
     def draw(self,img, corners, imgpts):
         corner = tuple(corners[0].ravel())
@@ -74,7 +103,7 @@ class vmarker:
         return img
 
     def drawaxis(self,frame):#30cm cube
-        self.axis = np.float32([[0.3,0,0], [0,0.3,0], [0,0,-0.3]]).reshape(-1,3)
+        self.axis = np.float32([[0.3,0,0], [0,0.3,0], [0,0,0.3]]).reshape(-1,3)
         imgpts, jac = cv2.projectPoints(self.axis, self.rvecs, self.tvecs, self.K, self.dist)
         img = self.draw(frame,self.ccorners,imgpts)
         cv2.imshow('projected',img)
@@ -93,7 +122,9 @@ if __name__=='__main__':
             #detect = detect_marker(frame)
             #cv2.imshow("detected",detect)
             #cv2.waitKey(1)
-            vm.getcamerapose(frame)
+            tv = vm.getcamerapose(frame)
+            print(vm.rvecs)
+            #print(vm.tvecs)
 
     except KeyboardInterrupt:
         print("Finish Program!")
