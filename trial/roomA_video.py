@@ -43,10 +43,12 @@ if __name__=='__main__':
             #nframe = cv2.undistort(frame, K, dist_coef)
             mask,cpts = extractRed(frame)
             cv2.imshow("mask",mask)
-            tv = vm.getcamerapose(frame)
             if vm.PNPsolved:
                 objxy = vm.getobjpose_1(cpts,-0.13)
                 print([objxy[0] -1.088,objxy[1] -1.412])
+            else:
+                tv = vm.getcamerapose(frame)
+                cv2.imwrite('extraction.png',frame)
             cv2.waitKey(1)
 
     except KeyboardInterrupt:
