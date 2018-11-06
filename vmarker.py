@@ -22,30 +22,6 @@ def detect_marker(frame):
     dimage = aruco.drawDetectedMarkers(frame,corners)
     return dimage
 
-def eulerAnglesToRotationMatrix(theta) :
-     
-    R_x = np.array([[1,         0,                  0                   ],
-                    [0,         math.cos(theta[0]), -math.sin(theta[0]) ],
-                    [0,         math.sin(theta[0]), math.cos(theta[0])  ]
-                    ])
-         
-         
-                     
-    R_y = np.array([[math.cos(theta[1]),    0,      math.sin(theta[1])  ],
-                    [0,                     1,      0                   ],
-                    [-math.sin(theta[1]),   0,      math.cos(theta[1])  ]
-                    ])
-                 
-    R_z = np.array([[math.cos(theta[2]),    -math.sin(theta[2]),    0],
-                    [math.sin(theta[2]),    math.cos(theta[2]),     0],
-                    [0,                     0,                      1]
-                    ])
-                     
-                     
-    R = np.dot(R_z, np.dot( R_y, R_x ))
- 
-    return R
-
 class vmarker:
     def __init__(self,markernum=5,K=[],dist=[],markerpos_file="mpos1.csv"):
         aruco = cv2.aruco
@@ -58,6 +34,7 @@ class vmarker:
         self.tvecs = []
         self.rvecs = []
         self.R = []
+        self.PNPsolved = False
     
     def setmarker(self,fname):
         #self.objp = np.zeros((markernum,3), np.float32)
@@ -89,15 +66,19 @@ class vmarker:
             #print(self.ccorners)
 
             # Find the rotation and translation vectors.
-            _, self.rvecs, self.tvecs, inliers = cv2.solvePnPRansac(self.objp, self.ccorners, self.K, self.dist)
+            self.PNPsolved, self.rvecs, self.tvecs, inliers = cv2.solvePnPRansac(self.objp, self.ccorners, self.K, self.dist)
             self.drawaxis(aruco.drawDetectedMarkers(frame,corners,ids)) # draw origin
-            self.R = eulerAnglesToRotationMatrix(self.rvecs)
+            self.R,_ = cv2.Rodrigues(self.rvecs)
             return -np.dot(self.R.T,self.tvecs)
 
         else:
-            cv2.imshow('projected',aruco.drawDetectedMarkers(frame,corners,ids))
-            cv2.waitKey(1)
-            return []
+            if self.PNPsolved:
+                self.drawaxis(frame)
+                return -np.dot(self.R.T,self.tvecs)
+            else:
+                cv2.imshow('projected',aruco.drawDetectedMarkers(frame,corners,ids))
+                cv2.waitKey(1)
+                return []
 
     def draw(self,img, origin, imgpts):
         corner = tuple(origin[0].ravel())
@@ -115,6 +96,33 @@ class vmarker:
         cv2.imshow('projected',img)
         cv2.waitKey(1)
 
+    # z: object height
+    def getobjpose_1(self,objpts,z):
+        self.R,_ = cv2.Rodrigues(self.rvecs)
+        pt = cv2.undistortPoints(np.array(objpts).reshape(-1,1,2),self.K,self.dist,P=self.K)
+        self.Rt = np.concatenate([self.R,self.tvecs],axis=1)
+        # Extraction
+        self.P = np.dot(self.K,self.Rt)
+        A3 = - np.float32([pt[0,0,0],pt[0,0,1],1]).reshape(3,1) #A1,A2 = self.Rt[:,0],self.Rt[:,1] 
+        A4 = self.P[:,2:3]*z+self.P[:,3:4]
+        A = np.concatenate([self.P[:,0:2],A3,A4],axis=1)
+        U, S, V = np.linalg.svd(A) # use svd to get null space
+        vec = V[3]
+        X = vec[0]/ vec[3]
+        Y = vec[1]/ vec[3]
+
+        return [X,Y]
+    
+    # assume zero height
+    def getobjpose_2(self,objpts):
+        # get 3d pose and convert to 2d
+        plane2dmap = self.objp[:,0:2].reshape(-1,1,2)
+        # then extract homography from 2dpose and image points
+        Homo,inliner = cv2.findHomography(self.ccorners,plane2dmap,cv2.RANSAC,3.0)
+        # finally from using homography to convert observed pts to 3d pose
+        pos=cv2.perspectiveTransform(np.float32([cx,cy]).reshape(-1,1,2),Homo)
+        return pos[0,0]
+        
 
 if __name__=='__main__':
     cap = cv2.VideoCapture(0)
