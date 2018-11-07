@@ -16,12 +16,21 @@ def extractRed(img):
     # HSV色空間に変換
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
+    hsv_min = np.array([0,127,0])
+    hsv_max = np.array([2,255,255])
+    mask1  = cv2.inRange(hsv, hsv_min, hsv_max)
+
     # 赤色のHSVの値域2
-    hsv_min = np.array([150,127,0])
-    hsv_max = np.array([179,255,255])
+    hsv_min = np.array([150,150,0])
+    hsv_max = np.array([180,255,255])
     mask2 = cv2.inRange(hsv, hsv_min, hsv_max)
     
-    Mmt = cv2.moments(mask2)
+    # RGB search
+    bgr_min = np.array([0,0,120])
+    bgr_max = np.array([50,50,255])
+    mask3 = cv2.inRange(img,bgr_min, bgr_max)
+
+    Mmt = cv2.moments(mask2+mask3)
     if Mmt["m00"] != 0:
         cx = Mmt['m10']/Mmt['m00']
         cy = Mmt['m01']/Mmt['m00']

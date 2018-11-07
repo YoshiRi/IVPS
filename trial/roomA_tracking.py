@@ -19,7 +19,12 @@ def extractRed(img):
     hsv_min = np.array([150,127,0])
     hsv_max = np.array([179,255,255])
     mask2 = cv2.inRange(hsv, hsv_min, hsv_max)
-    
+
+    # RGB search
+    bgr_min = np.array([0,0,120])
+    bgr_max = np.array([50,50,255])
+    mask3 = cv2.inRange(img,bgr_min, bgr_max)
+
     Mmt = cv2.moments(mask2)
     if Mmt["m00"] != 0:
         cx = Mmt['m10']/Mmt['m00']
@@ -32,12 +37,14 @@ def extractRed(img):
     return mask2,[cx,cy],flag
 
 
+
+
 if __name__=='__main__':
     cap = cv2.VideoCapture(0)
     # load camera matrix and distort matrix
     K = np.loadtxt("../calib_usb/K.csv",delimiter=",")
     dist_coef = np.loadtxt('../calib_usb/d.csv',delimiter=",")
-    vm = vmarker(markernum=5,K=K,dist=dist_coef,markerpos_file="roomA.csv")
+    vm = vmarker(markernum=5,K=K,dist=dist_coef,markerpos_file="roomA_ground_orig.csv")
     try:
         while ~cap.isOpened():
             ok,frame = cap.read()
@@ -45,11 +52,12 @@ if __name__=='__main__':
             mask,cpts,flag = extractRed(frame)
             cv2.imshow("mask",mask)
             if vm.PNPsolved*flag:
-                objxy = vm.getobjpose_1(cpts,-0.13)
-                print([objxy[0] -1.088,objxy[1] -1.412])
+                objxy = vm.getobjpose_1(cpts,0.13)
+                print([objxy[0] ,objxy[1]])
             else:
                 tv = vm.getcamerapose(frame)
                 cv2.imwrite('extraction.png',frame)
+            vm.showmarker(frame)
             cv2.waitKey(1)
             
 
