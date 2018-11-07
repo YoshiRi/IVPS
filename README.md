@@ -8,6 +8,12 @@ Indoor Vision based Positioning System (Under Construction)
 - Assuming ROS Kinetic Environment on Ubuntu
 - Python2.7 with OpenCV3.X with Opencv-contrib package
 
+To install opencv with contrib package, type
+
+```
+pip install opencv-contrib-python
+```
+
 ## Usage
 
 ```python
