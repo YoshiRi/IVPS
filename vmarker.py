@@ -35,6 +35,7 @@ class vmarker:
         self.rvecs = []
         self.R = []
         self.PNPsolved = False
+        self.hasCameraPose = False
     
     def setmarker(self,fname):
         #self.objp = np.zeros((markernum,3), np.float32)
@@ -55,7 +56,8 @@ class vmarker:
     def getcamerapose(self,frame):
         aruco = cv2.aruco
         corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, self.dictionary)
-
+        self.PNPsolved = False
+        
         if len(corners) == self.mnum:
             # sort based on IDs and use center value
             centercorners = []
@@ -67,12 +69,13 @@ class vmarker:
 
             # Find the rotation and translation vectors.
             self.PNPsolved, self.rvecs, self.tvecs, inliers = cv2.solvePnPRansac(self.objp, self.ccorners, self.K, self.dist)
+            self.hasCameraPose = True
             self.drawaxis(aruco.drawDetectedMarkers(frame,corners,ids)) # draw origin
             self.R,_ = cv2.Rodrigues(self.rvecs)
             return -np.dot(self.R.T,self.tvecs)
 
         else:
-            if self.PNPsolved:
+            if self.hasCameraPose:
                 self.drawaxis(frame)
                 return -np.dot(self.R.T,self.tvecs)
             else:
@@ -110,7 +113,6 @@ class vmarker:
         vec = V[3]
         X = vec[0]/ vec[3]
         Y = vec[1]/ vec[3]
-
         return [X,Y]
     
     # assume zero height

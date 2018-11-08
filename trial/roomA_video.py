@@ -59,7 +59,7 @@ if __name__=='__main__':
             ok,frame = cap.read()
             #nframe = cv2.undistort(frame, K, dist_coef)
             mask,cpts,flag = extractRed(frame)
-            if vm.PNPsolved*flag:
+            if vm.hasCameraPose*flag:
                 objxy = vm.getobjpose_1(cpts,0.13)
                 print([objxy[0],objxy[1]])
             else:
