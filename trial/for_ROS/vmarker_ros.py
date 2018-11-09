@@ -65,7 +65,8 @@ class vmarker:
         self.rvecs = []
         self.R = []
         self.PNPsolved = False
-    
+        self.hasCameraPose = False
+
     def setmarker(self,fname):
         #self.objp = np.zeros((markernum,3), np.float32)
         self.objp = np.loadtxt(fname,delimiter=",")
@@ -152,6 +153,16 @@ class vmarker:
         # finally from using homography to convert observed pts to 3d pose
         pos=cv2.perspectiveTransform(np.float32([cx,cy]).reshape(-1,1,2),Homo)
         return pos[0,0]
+        
+    def loadCameraPoseYAML(self,filename):
+        import yaml
+        # load "rvecs" and "tvecs" then load these vectors into object
+        with open(filename) as stream:
+            posdata=yaml.load(stream)
+            self.rvecs = np.array(posdata["rvecs"]).reshape(3,1)
+            self.tvecs = np.array(posdata["tvecs"]).reshape(3,1)
+        # Enable extraction
+        self.hasCameraPose = True
         
 
 if __name__=='__main__':
