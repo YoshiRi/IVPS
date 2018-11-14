@@ -109,7 +109,12 @@ class vmarker:
         A3 = - np.float32([pt[0,0,0],pt[0,0,1],1]).reshape(3,1) #A1,A2 = self.Rt[:,0],self.Rt[:,1] 
         A4 = self.P[:,2:3]*z+self.P[:,3:4]
         A = np.concatenate([self.P[:,0:2],A3,A4],axis=1)
-        U, S, V = np.linalg.svd(A) # use svd to get null space
+        try:
+            U, S, V = np.linalg.svd(np.dot(A.T,A)) # use svd to get null space
+        except: # see here http://oppython.hatenablog.com/entry/2014/01/21/003245
+            S2,vt = np.linalg.eigh(np.dot(A.T ,A)) # if numpy method is unstable
+            vt=vt[:,::-1]#,S2 = w[::-1]
+            V = vt.T                
         vec = V[3]
         X = vec[0]/ vec[3]
         Y = vec[1]/ vec[3]
