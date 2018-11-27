@@ -4,6 +4,45 @@ import cv2
 import sys
 import pickle
 import numpy as np
+import matplotlib.pyplot as plt
+
+pos1 = []
+pos2 = []
+pos3 = []
+
+def find_rect_of_target_color(image):
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV_FULL)
+    h = hsv[:, :, 0]
+    s = hsv[:, :, 1]
+    mask = np.zeros(h.shape, dtype=np.uint8)
+    mask[((h < 15) | (h > 200)) & (s > 128)] = 255
+    _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    rects = []
+    
+    for contour in contours:
+        approx = cv2.convexHull(contour)
+        rect = cv2.boundingRect(approx)
+        rects.append(np.array(rect))
+    return max(rects, key=(lambda x: x[2] * x[3])) #return maximum rectangle
+
+def extractRed2(image):
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV_FULL)
+    h = hsv[:, :, 0]
+    s = hsv[:, :, 1]
+    mask = np.zeros(h.shape, dtype=np.uint8)
+    mask[((h < 10) | (h > 200)) & (s > 128)] = 255
+    Mmt = cv2.moments(mask)
+    if Mmt["m00"] != 0:
+        cx = Mmt['m10']/Mmt['m00']
+        cy = Mmt['m01']/Mmt['m00']
+        flag = True
+    else:
+        cx,cy = 0,0
+        flag = False
+    #print([cx,cy])
+    return mask,[cx,cy],flag
+
+
 
 def extractRed(img):
     # HSV色空間に変換
@@ -20,7 +59,7 @@ def extractRed(img):
         hsv_max = np.array([rcenter+rwid,255,255])
         mask2 = cv2.inRange(hsv, hsv_min, hsv_max)
 
-        if sum(mask2.reshape(-1))/hei*wid > 0.2:
+        if sum(mask2.reshape(-1))/hei/wid/255 > 0.2:
             break
         
         dark = dark - 10
@@ -55,6 +94,12 @@ def get_tracker(name):
 
 def extractROI(frame,roi):
     return frame[int(roi[1]):int(roi[1]+roi[3]),int(roi[0]):int(roi[0]+roi[2])]
+
+def drawrect(frame,bbox,color=(0,255,0)):
+    p1 = (int(bbox[0]), int(bbox[1]))
+    p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
+    cv2.rectangle(frame, p1, p2, color, 2, 1)
+
 
 if __name__ == '__main__':
     """
@@ -109,14 +154,13 @@ if __name__ == '__main__':
         with open(method+'tracker.pickle', mode='wb') as f:
             pickle.dump(tracker, f)
 
+    
+
     while True:
         # VideoCaptureから1フレーム読み込む
         ret, frame = cap.read()
         if not ret:
-            k = cv2.waitKey(1)
-            if k == 27 :
-                break
-            continue
+            break
 
         # Start timer
         timer = cv2.getTickCount()
@@ -125,25 +169,34 @@ if __name__ == '__main__':
         track, bbox = tracker.update(frame)
 
         cv2.imshow('tracked',extractROI(frame,bbox))
-        rmask,centers,_ = extractRed(extractROI(frame,bbox))
+        rmask,centers,_ = extractRed2(extractROI(frame,bbox))
         rmask_ = cv2.circle(rmask, (int(centers[0]), int(centers[1])), 1, (0, 0, 255), -1, cv2.LINE_AA)
         cv2.imshow('tracked_mask',rmask_)
+        pos1.append([bbox[0]+centers[0],bbox[1]+centers[1]])
+
+        mask,centers,_ = extractRed2(frame)
+        pos3.append([centers[0],centers[1]])
+        cv2.imshow('raw_mask',mask)
+        
+
         # FPSを計算する
         fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
 
         # 検出した場所に四角を書く
         if track:
             # Tracking success
-            p1 = (int(bbox[0]), int(bbox[1]))
-            p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
-            cv2.rectangle(frame, p1, p2, (0,255,0), 2, 1)
+            redbox = find_rect_of_target_color(frame)
+            pos2.append([redbox[0]+redbox[2]/2,redbox[1]+redbox[3]/2])
+            drawrect(frame,redbox)
+            drawrect(frame,bbox)
+
         else :
             # トラッキングが外れたら警告を表示する
             cv2.putText(frame, "Failure", (10,50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, cv2.LINE_AA)
 
         # FPSを表示する
         cv2.putText(frame, "FPS : " + str(int(fps)), (10,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, cv2.LINE_AA)
-        #cv2.putText(frame, "Center:"+str(centers), (10,50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, cv2.LINE_AA)
+        
 
         # 加工済の画像を表示する
         cv2.imshow("Tracking", frame)
@@ -152,6 +205,27 @@ if __name__ == '__main__':
         k = cv2.waitKey(1)
         if k == 27 :
             break
+
+
+p1 = np.array(pos1).reshape(-1,2)
+p2 = np.array(pos2).reshape(-1,2)
+p3 = np.array(pos3).reshape(-1,2)
+plt.figure(1)
+plt.plot(p1[:,0],-p1[:,1],p2[:,0],-p2[:,1],p3[:,0],-p3[:,1])
+plt.legend(['Coarse&Fine','Fine','Rect'])
+
+plt.figure(2)
+plt.subplot(121)
+plt.plot(p1[:,0])
+plt.plot(p2[:,0])
+plt.plot(p3[:,0])
+plt.legend(['Coarse&Fine','Fine','Rect'])
+plt.subplot(122)
+plt.plot(p1[:,1])
+plt.plot(p2[:,1])
+plt.plot(p3[:,1])
+plt.legend(['Coarse&Fine','Fine','Rect'])
+plt.show()
 
 # キャプチャをリリースして、ウィンドウをすべて閉じる
 cap.release()
