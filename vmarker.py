@@ -67,11 +67,11 @@ class vmarker:
                 geometrypositions.append(self.objp[id_])
                 
             self.ccorners = np.array(centercorners).reshape(self.mnum,1,2)
-            self.3dcornerpos = np.array(geometrypositions).reshape(len(ids),3)
+            self.realcornerpos = np.array(geometrypositions).reshape(len(ids),3)
             #print(self.ccorners)
 
             # Find the rotation and translation vectors.
-            self.PNPsolved, self.rvecs, self.tvecs, inliers = cv2.solvePnPRansac(self.3dcornerpos, self.ccorners, self.K, self.dist)
+            self.PNPsolved, self.rvecs, self.tvecs, inliers = cv2.solvePnPRansac(self.realcornerpos, self.ccorners, self.K, self.dist)
             self.hasCameraPose = True
             self.drawaxis(aruco.drawDetectedMarkers(frame,corners,ids)) # draw origin
             self.R,_ = cv2.Rodrigues(self.rvecs)
