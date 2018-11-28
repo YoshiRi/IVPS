@@ -28,9 +28,21 @@ from vmarker import *
 ```
 
 
-# Real Setting
+# Program Flow
 
-- Put marker on the ground 
-- Set a ground coordinate and measure marker position
+## Detect Camera Pose
 
-Remember opencv using left-handed coordinates!
+- Put marker on the ground and write its coordinate to csv file
+- Camera pose is solved from PNP solver
+
+
+## Tracking the Interested Region
+
+- `RedTracker.py` provide the tracking algorithm
+
+![](tracker_algorithm.jpg)
+
+## Give Marker Height and Get 3D Position
+
+- Given the **height of the tracking point**, Marker position is solved via homogeneous linear equations
+

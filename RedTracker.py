@@ -1,20 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*
-# assuming python2 for ROS
+# assuming python3 
 
 import cv2
 import numpy as np
 
 
-class RedZoneTracker:
-    def __init__(self,frame,initialize_with_hand=1,tracker='KCF',showimage=0):
-        self.bboxsize = 30
-        self.refreshtracker = 5  # the maximum acceptable center of mass position error
+class RedTracker:
+    def __init__(self,frame,initialize_with_hand=1,tracker='KCF',showimage=0,bboxsize=20):
+        self.bboxsize = bboxsize
+        self.refreshTHDtracker = 5  # the maximum acceptable center of mass position error
         self.pos = [] # tracked 2d point
 
         # if init with hand:
         if initialize_with_hand:
-            self.bbox = cv2.selectROI(frame, False)
+            rect = cv2.selectROI(frame, False)
+            self.bbox = (rect[0]+rect[2]/2-self.bboxsize/2,rect[1]+rect[3]/2-self.bboxsize/2,self.bboxsize,self.bboxsize)
             cv2.destroyAllWindows()
         else:   # if init automatically
             self.bbox,_ = self.find_largest_redzone_rect(frame,bboxsize=self.bboxsize)
@@ -49,11 +50,12 @@ class RedZoneTracker:
         p1 = (int(bbox[0]), int(bbox[1]))
         p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
         cv2.rectangle(frame, p1, p2, color, 2, 1)
+        return frame
 
     def showrect(self,frame,waittime=1):
         # show bounding box
         framewithrect = self.drawrect(frame.copy(),self.bbox)
-        cv2.putText(framewithrect, "BoundingBox : " + str(self.bbox), (10,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, cv2.LINE_AA)
+        cv2.putText(framewithrect, "Press Any Key to Start! Rect is " + str(self.bbox), (10,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, cv2.LINE_AA)
         cv2.imshow("show bbox",framewithrect)
         cv2.waitKey(waittime)
 
@@ -63,20 +65,26 @@ class RedZoneTracker:
         # track is succeed:
         if self.ok:
             _,centers,_,validnum = self.extractRed(self.extractROI(frame,self.bbox))
-            self.pos = [bbox[0]+centers[0],bbox[1]+centers[1]]
+            self.pos = [self.bbox[0]+centers[0],self.bbox[1]+centers[1]]
             self.validpixelnum = validnum
-            if self.refreshtracker  = max(abs(self.bboxsize/2 - centers[0]),abs(self.bboxsize/2 - centers[1])):
+            if self.refreshTHDtracker  <  max(abs(self.bboxsize/2 - centers[0]),abs(self.bboxsize/2 - centers[1])):
                 self.bbox = (self.pos[0]-self.bboxsize/2,self.pos[1]-self.bboxsize/2,self.bboxsize,self.bboxsize)
                 self.boxtracker.init(frame,self.bbox)
+                print('reinit tracker!')
 
             if self.showimage:
                 cv2.imshow("tracked", self.drawrect(frame.copy(),self.bbox))
+                cv2.waitKey(1)
 
         else:
             print("Failed to track!")
 
     def getpos(self):
         return self.pos
+    def getrect(self):
+        return self.bbox
+    def getvalidpixelnumber(self):
+        return self.validpixelnum
 
     def find_largest_redzone_rect(self,image,bboxsize=30):
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV_FULL)
@@ -107,7 +115,7 @@ class RedZoneTracker:
 
         # get RED size
         validnum = sum(mask.reshape(-1))/255
-        hei,wid = image.shape
+        hei,wid,_ = image.shape
 
         Mmt = cv2.moments(mask)
         if Mmt["m00"] != 0:
@@ -119,3 +127,68 @@ class RedZoneTracker:
             flag = False
         #print([cx,cy])
         return mask,[cx,cy],flag,validnum
+
+
+
+
+if __name__ == '__main__':
+    import sys
+    try:
+        fname = sys.argv[1]
+    except:
+        fname = 0
+
+    cap = cv2.VideoCapture(fname)
+    ok,frame = cap.read()
+    
+    if not ok:
+        sys.exit(-1)
+
+    tracker = RedTracker(frame,showimage=1,initialize_with_hand=0)
+
+    pos1 = []
+    pix = []
+    # Start timer
+    
+    while 1:
+        ok,frame = cap.read()
+        timer = cv2.getTickCount()  
+        if not ok:
+            break
+
+        tracker.track(frame)
+        
+        
+        pos1.append(tracker.getpos())
+        pix.append(tracker.getvalidpixelnumber())
+        
+        # show FPS
+        fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
+        print("FPS: "+str(fps),flush=True)
+
+        k = cv2.waitKey(1)
+        if k == 27 :
+            break
+
+    import matplotlib.pyplot as plt
+
+    p1 = np.array(pos1).reshape(-1,2)
+    pix1 = np.array(pix).reshape(-1)
+
+    plt.figure(1)
+    plt.plot(p1[:,0],-p1[:,1],label='Coarse&Fine')
+    plt.legend()
+    plt.figure(2)
+    plt.subplot(121)
+    plt.plot(p1[:,0],label='Coarse&Fine x')
+    plt.subplot(122)
+    plt.plot(p1[:,1],label='Coarse&Fine y')
+    plt.legend()
+    plt.figure(3)
+    plt.plot(pix1,label='number of valid pixel')
+    plt.legend()
+    plt.show()
+
+    # キャプチャをリリースして、ウィンドウをすべて閉じる
+    cap.release()
+    cv2.destroyAllWindows()
