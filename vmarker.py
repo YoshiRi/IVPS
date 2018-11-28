@@ -53,6 +53,18 @@ class vmarker:
         cv2.imshow("detected",detect)
         cv2.waitKey(1)
     
+    def load_camerapose_yml(self,file):
+        try:
+            import yaml
+            with open(file, 'r') as stream:
+                dic = yaml.load(stream)
+                self.rvec = np.float32(dic['rvecs'])
+                self.tvec = np.float32(dic['tvecs']).reshape(3,1)
+                self.PNPsolved = True
+
+        except:
+            print("Something going wrong!")
+        
     def getcamerapose(self,frame):
         aruco = cv2.aruco
         corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, self.dictionary)
