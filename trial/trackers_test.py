@@ -187,7 +187,7 @@ if __name__ == '__main__':
             # Tracking success
             redbox = find_rect_of_target_color(frame)
             pos2.append([redbox[0]+redbox[2]/2,redbox[1]+redbox[3]/2])
-            drawrect(frame,redbox)
+            drawrect(frame,redbox,[0,0,255])
             drawrect(frame,bbox)
 
         else :
