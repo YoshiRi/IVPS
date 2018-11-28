@@ -14,7 +14,7 @@ from vmarker import *
 
 
 if __name__=='__main__':
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     args = sys.argv
     duration = 10000 # 10000 sample = 333s = 5.5m
     if len(args) > 1:

@@ -111,7 +111,7 @@ if __name__ == '__main__':
     try:
         filename = sys.argv[1]
     except:
-        filename = 'Videos/square50.avi'
+        filename = 0
 
     ##---------- Method ----------------##
     try:
@@ -211,20 +211,22 @@ p1 = np.array(pos1).reshape(-1,2)
 p2 = np.array(pos2).reshape(-1,2)
 p3 = np.array(pos3).reshape(-1,2)
 plt.figure(1)
-plt.plot(p1[:,0],-p1[:,1],p2[:,0],-p2[:,1],p3[:,0],-p3[:,1])
-plt.legend(['Coarse&Fine','Fine','Rect'])
+plt.plot(p1[:,0],-p1[:,1],label='Coarse&Fine')
+plt.plot(p2[:,0],-p2[:,1],label='Fine')
+plt.plot(p3[:,0],-p3[:,1],label='LargestRegion')
+plt.legend()
 
 plt.figure(2)
 plt.subplot(121)
-plt.plot(p1[:,0])
-plt.plot(p2[:,0])
-plt.plot(p3[:,0])
-plt.legend(['Coarse&Fine','Fine','Rect'])
+plt.plot(p1[:,0],label='Coarse&Fine')
+plt.plot(p2[:,0],label='Fine')
+plt.plot(p3[:,0],label='LargestRegion')
+plt.legend()
 plt.subplot(122)
-plt.plot(p1[:,1])
-plt.plot(p2[:,1])
-plt.plot(p3[:,1])
-plt.legend(['Coarse&Fine','Fine','Rect'])
+plt.plot(p1[:,1],label='Coarse&Fine')
+plt.plot(p2[:,1],label='Fine')
+plt.plot(p3[:,1],label='LargestRegion')
+plt.legend()
 plt.show()
 
 # キャプチャをリリースして、ウィンドウをすべて閉じる

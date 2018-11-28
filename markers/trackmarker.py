@@ -22,28 +22,35 @@ def detect_marker1(frame):
 def detect_marker2(frame):# detect smallmarkers
     aruco = cv2.aruco
     dictionary = aruco.getPredefinedDictionary(aruco.DICT_4X4_50)
-    corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary)
+    corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary,parameters=param)
     dimage = aruco.drawDetectedMarkers(frame.copy(),corners)
-    return dimage
+    dfimage = aruco.drawDetectedMarkers(frame.copy(),rejectedImgPoints)
+    
+    return dimage,dfimage
 
+
+param= cv2.aruco.DetectorParameters_create()
+param.minDistanceToBorder = 1
 
 if __name__=='__main__':
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     args = sys.argv
     duration = 10000 # 10000 sample = 333s = 5.5m
     if len(args) > 1:
         duration = int(args[1])
     # Define the codec and create VideoWriter object
     
-    
+
     try:
         while ~cap.isOpened() and (duration > 0 ):
             ret,frame = cap.read()
             duration = duration - 1
             if ret==True:
 
-                dframe = detect_marker2(frame)
+                dframe,dfframe = detect_marker2(frame)
                 cv2.imshow('frame',dframe)
+                cv2.imshow('frame candidate',dfframe)
+                
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
             else:
