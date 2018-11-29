@@ -23,6 +23,8 @@ import numpy as np
 import sys
 import math
 from docopt import docopt
+import matplotlib.pyplot as plt
+
 
 sys.path.append("../")
 
@@ -82,16 +84,28 @@ if __name__=='__main__':
     else:
         tracker = RedTracker(frame, showimage=args["--display_image"], initialize_with_hand=args["--init_hand"])
 
-
+    pos = []
     # start video stream
     try:
+        lines = []
         while ~cap.isOpened():
             ok,frame = cap.read()
             if not ok:
                 break
             tracker.track(frame)
             objxy = vm.getobjpose_1(tracker.getpos(), oheight)
-            print(str(tracker.getpos())+str(objxy))
+            ## print(str(tracker.getpos())+str(objxy))
+            pos.append(objxy)
+            #line1 = live_plotter(np.array(pos).reshape(-1,2),line1)
+            
+            if not lines:
+                fig, ax = plt.subplots(1,1)
+                lines, = ax.plot([i[0] for i in pos],[i[1] for i in pos])
+                ax.set_xlim((-1.5,1.5))
+                ax.set_ylim((-1.5,1.5))
+            else:
+                lines.set_data([i[0] for i in pos],[i[1] for i in pos])
+            plt.pause(0.001)
             
 
     except KeyboardInterrupt:
@@ -99,3 +113,4 @@ if __name__=='__main__':
 
     cap.release()
     cv2.destroyAllWindows()
+
