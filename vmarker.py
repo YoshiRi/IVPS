@@ -56,12 +56,12 @@ class vmarker:
     def load_camerapose_yml(self,file):
         try:
             import yaml
-            with open(file, 'r') as stream:
+            with open(file, 'r+') as stream:
                 dic = yaml.load(stream)
-                self.rvec = np.float32(dic['rvecs'])
-                self.tvec = np.float32(dic['tvecs']).reshape(3,1)
+                print(dic)
+                self.rvecs = np.float32(dic["rvecs"]).reshape(3,1)
+                self.tvecs = np.float32(dic["tvecs"]).reshape(3,1)
                 self.PNPsolved = True
-
         except:
             print("Something going wrong!")
         
