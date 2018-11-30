@@ -52,7 +52,7 @@ if __name__=='__main__':
     # load camera matrix and distort matrix
     K = np.loadtxt("../calib_usb/K.csv",delimiter=",")
     dist_coef = np.loadtxt('../calib_usb/d.csv',delimiter=",")
-    vm = vmarker(markernum=5,K=K,dist=dist_coef,markerpos_file="roomA_ground_orig.csv")
+    vm = vmarker(markernum=5,K=K,dist=dist_coef,markerpos_file="data/roomA_ground_orig.csv")
 
     # 1. extract camera pose
     if args["--camerainformation"]: # has camera yaml file

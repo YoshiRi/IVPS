@@ -1,2 +1,2 @@
 *.avi
-
+!sample/data/samplevideo.avi
