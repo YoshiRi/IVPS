@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import ArtistAnimation
 from matplotlib.animation import FuncAnimation
 
-pos3d = np.loadtxt("pos3d.txt")
+pos3d = np.loadtxt("data/pos3d.txt")
 anime = 0
 
 fig, ax = plt.subplots()
@@ -47,7 +47,7 @@ def run(i):
 
     line.set_data(xdata, ydata)
     line2.set_data(x,y)
-    plt.legend()
+    plt.legend(loc='upper left')
 
 
 
@@ -57,7 +57,7 @@ if anime:
     plt.grid = 'on'
     plt.xlabel('x [m]')
     plt.ylabel('y [m]')
-    plt.legend(['tracking route','current position'])
+    plt.legend(['tracking route','current position'],loc='upper left')
 
     ims = []
 
