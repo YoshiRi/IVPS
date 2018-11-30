@@ -24,7 +24,7 @@ python test.py --help
 Execution example
 
 ```
-python test.py  -f ..\trial\Videos\square100A.avi -c camerapos.yml -d
+python test.py  -f data/samplevideo.avi -c data/camerapos.yml -d
 ```
 
 
