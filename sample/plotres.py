@@ -80,7 +80,7 @@ if anime:
 else:
 
     ani = FuncAnimation(fig, run,  blit=False, interval=10, frames = int(len(pos3d)/8)-1,
-                              repeat=False, init_func=init)
+                            repeat=False, init_func=init)
 
     ani.save("plot2.gif",writer='imagemagick')
     plt.show()

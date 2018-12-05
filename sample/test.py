@@ -67,6 +67,7 @@ if __name__=='__main__':
                 break
             tv=vm.getcamerapose(frame)
             if vm.hasCameraPose:
+                print('Camera Poses R,T is:'+str(vm.rvecs.T)+str(vm.tvecs.T))
                 break
             vm.showmarker(frame)
             cv2.waitKey(1)
@@ -104,8 +105,18 @@ if __name__=='__main__':
     except KeyboardInterrupt:
         print("Finish Program!")
 
+    if args["--display_image"]:
+        plt.plot([i[0] for i in pos3d],[i[1] for i in pos3d])
+        plt.xlabel('x [m]')
+        plt.ylabel('y [m]')
+        plt.show()
+
     np.savetxt("pos2d.txt",np.array(pos2d))
     np.savetxt("pos3d.txt",np.array(pos3d))
+    
+    print('Average and std')
+    print(np.mean(np.array(pos3d).reshape(-1,2),axis=0))
+    print(np.std(np.array(pos3d).reshape(-1,2),axis=0))
     cap.release()
     cv2.destroyAllWindows()
 

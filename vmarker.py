@@ -36,6 +36,11 @@ class vmarker:
         self.R = []
         self.PNPsolved = False
         self.hasCameraPose = False
+        self.detectparam = aruco.DetectorParameters_create()
+        self.detectparam.adaptiveThreshConstant = 5.0
+        self.detectparam.cornerRefinementMethod = 0
+        #self.detectparam.minMarkerDistanceRate = 0.02
+        #self.detectparam.errorCorrectionRate = 0.8
     
     def setmarker(self,fname):
         #self.objp = np.zeros((markernum,3), np.float32)
@@ -48,7 +53,7 @@ class vmarker:
     
     def showmarker(self,frame):
         aruco = cv2.aruco
-        corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, self.dictionary)
+        corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, self.dictionary, parameters = self.detectparam)
         detect = aruco.drawDetectedMarkers(frame,corners)
         cv2.imshow("detected",detect)
         cv2.waitKey(1)
@@ -67,7 +72,7 @@ class vmarker:
         
     def getcamerapose(self,frame):
         aruco = cv2.aruco
-        corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, self.dictionary)
+        corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, self.dictionary, parameters = self.detectparam)
         self.PNPsolved = False
         
         if len(corners) == self.mnum:
