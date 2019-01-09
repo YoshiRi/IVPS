@@ -5,7 +5,7 @@
 """Process Video and Get Camera Pose
 
 usage:
-    test.py [-h] [--display_image] [--init_hand] [--filename <fn>] [--sizeofwindow <s>] [--objectheight <hei>] [--camerainformation <camerafile>]
+    test.py [-h] [--display_image] [--init_hand] [--filename <fn>] [--sizeofwindow <s>] [--objectheight <hei>] [--camerainformation <camerafile>] [--allow3ptsestimate]
 
 options:
     -h, --help  show this help message and exit
@@ -15,6 +15,7 @@ options:
     -s, --sizeofwindow <s>    windowsize for tracking
     -o, --objectheight <dep> tracking vehicle height
     -c, --camerainformation <camerafile> camera position file
+    -a, --allow3ptsestimate     allow use only 3 points to estimate camera pose
 """
 
 
@@ -65,7 +66,7 @@ if __name__=='__main__':
             ok,frame = cap.read()
             if not ok:
                 break
-            tv=vm.getcamerapose(frame)
+            tv=vm.getcamerapose(frame,allow3pts=args["--allow3ptsestimate"],rvec_init=[1.73052624,1.26932939,-0.6861009],tvec_init=[0.26549237,0.28860147,3.46103553])
             if vm.hasCameraPose:
                 print('Camera Poses R,T is:'+str(vm.rvecs.T)+str(vm.tvecs.T))
                 break

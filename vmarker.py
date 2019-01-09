@@ -70,12 +70,13 @@ class vmarker:
         except:
             print("Something going wrong!")
         
-    def getcamerapose(self,frame):
+    def getcamerapose(self,frame,allow3pts = False,rvec_init = [], tvec_init = []):
         aruco = cv2.aruco
         corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, self.dictionary, parameters = self.detectparam)
         self.PNPsolved = False
         
-        if len(corners) == self.mnum:
+        # if corner number is larger than 3
+        if len(corners) >= 4:
             # sort based on IDs and use center value
             centercorners = []
             geometrypositions = []
@@ -83,7 +84,7 @@ class vmarker:
                 centercorners.append(np.average(corner,1))
                 geometrypositions.append(self.objp[id_])
                 
-            self.ccorners = np.array(centercorners).reshape(self.mnum,1,2)
+            self.ccorners = np.array(centercorners).reshape(len(ids),1,2)
             self.realcornerpos = np.array(geometrypositions).reshape(len(ids),3)
             #print(self.ccorners)
 
@@ -98,6 +99,27 @@ class vmarker:
             if self.hasCameraPose:
                 self.drawaxis(frame)
                 return -np.dot(self.R.T,self.tvecs)
+            elif allow3pts and len(corners)==3:
+                # sort based on IDs and use center value
+                centercorners = []
+                geometrypositions = []
+                for id_,corner in sorted(zip(ids,corners)): #corner=[x11,y11]...
+                    centercorners.append(np.average(corner,1))
+                    geometrypositions.append(self.objp[id_])
+                    
+                self.ccorners = np.array(centercorners).reshape(len(ids),1,2)
+                self.realcornerpos = np.array(geometrypositions).reshape(len(ids),3)
+                #print(self.ccorners)
+                
+                rvec_init = np.float32(rvec_init).reshape(3,1)
+                tvec_init = np.float32(tvec_init).reshape(3,1)
+                
+                # Find the rotation and translation vectors.
+                self.PNPsolved, self.rvecs, self.tvecs = cv2.solvePnP(self.realcornerpos, self.ccorners, self.K, self.dist, flags = cv2.SOLVEPNP_ITERATIVE, useExtrinsicGuess = 1,rvec=rvec_init,tvec=tvec_init)
+                self.hasCameraPose = True
+                self.drawaxis(aruco.drawDetectedMarkers(frame,corners,ids)) # draw origin
+                self.R,_ = cv2.Rodrigues(self.rvecs)
+                return -np.dot(self.R.T,self.tvecs)                
             else:
                 cv2.imshow('projected',aruco.drawDetectedMarkers(frame,corners,ids))
                 cv2.waitKey(1)
