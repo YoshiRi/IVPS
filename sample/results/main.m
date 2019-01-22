@@ -56,7 +56,9 @@ vx = ex -x;
 vy = ey -y;
 
 figure(3)
+clf
 for i=1:row/2
-    quiver(x(i),y(i),vx(i)*10,vy(i)*10)
+    quiver(x(i),y(i),vx(i)*10,vy(i)*10,'bo','LineWidth',3,'MaxHeadSize',4,'ShowArrowHead','on');
     hold on
 end
+grid on
