@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*
-# assuming python3 and OpenCV 3.X
+# assuming python2.7 and OpenCV 3.X
 
 """Process Video and Get Camera Pose
 
@@ -99,25 +99,13 @@ if __name__=='__main__':
             objxy = vm.getobjpose_1(tracker.getpos(), oheight)
             ## print(str(tracker.getpos())+str(objxy))
             
-            pos2d.append(tracker.pos)
-            pos3d.append(objxy)
+            # write your print function here
+            print(objxy)
             
 
     except KeyboardInterrupt:
         print("Finish Program!")
 
-    if args["--display_image"]:
-        plt.plot([i[0] for i in pos3d],[i[1] for i in pos3d])
-        plt.xlabel('x [m]')
-        plt.ylabel('y [m]')
-        plt.show()
-
-    np.savetxt("pos2d.txt",np.array(pos2d))
-    np.savetxt("pos3d.txt",np.array(pos3d))
-    
-    print('Average and std')
-    print(np.mean(np.array(pos3d).reshape(-1,2),axis=0))
-    print(np.std(np.array(pos3d).reshape(-1,2),axis=0))
     cap.release()
     cv2.destroyAllWindows()
 

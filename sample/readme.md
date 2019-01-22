@@ -21,11 +21,21 @@ python test.py --help
 
 # Demo videos
 
-Execution example
+- Execution example (with video file)
 
 ```
 python test.py  -f data/samplevideo.avi -c data/camerapos.yml -d
 ```
+
+- Execution example (with usb camera input)
+
+If you want to get realtime position output, try following command.
+
+```
+python realtime_output.py -d
+```
+
+You can update the print function in l.103 with your own output function.
 
 
 ## tracking result
