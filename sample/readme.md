@@ -6,7 +6,7 @@
 ## Requirement
 Please check packages in below are installed
 
-- opencv3.x
+- opencv2.7
 - docopt
 
 ## usage
