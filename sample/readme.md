@@ -1,6 +1,7 @@
 # Sample Code 
 
-- test.py
+- test.py : tracking and show figure before quitting
+- realtime_output.py : tracking and print the marker position in realtime
 
 ## Requirement
 Please check packages in below are installed
