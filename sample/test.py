@@ -70,9 +70,11 @@ if __name__=='__main__':
             if vm.hasCameraPose:
                 print('Camera Poses R,T is:'+str(vm.rvecs.T)+str(vm.tvecs.T))
                 break
-            vm.showmarker(frame)
-            cv2.waitKey(1)
-    cv2.destroyAllWindows()
+            if args["--display_image"]:
+                vm.showmarker(frame)
+                cv2.waitKey(1)
+    if args["--display_image"]:
+        cv2.destroyAllWindows()
 
 
 
