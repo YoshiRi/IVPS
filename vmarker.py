@@ -80,12 +80,16 @@ class vmarker:
             # sort based on IDs and use center value
             centercorners = []
             geometrypositions = []
+            matched = 0
             for id_,corner in sorted(zip(ids,corners)): #corner=[x11,y11]...
+                if id_ > self.mnum:
+                    break
+                matched += 1
                 centercorners.append(np.average(corner,1))
                 geometrypositions.append(self.objp[id_])
                 
-            self.ccorners = np.array(centercorners).reshape(len(ids),1,2)
-            self.realcornerpos = np.array(geometrypositions).reshape(len(ids),3)
+            self.ccorners = np.array(centercorners).reshape(matched,1,2)
+            self.realcornerpos = np.array(geometrypositions).reshape(matched,3)
             #print(self.ccorners)
 
             # Find the rotation and translation vectors.
