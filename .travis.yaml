@@ -1,0 +1,12 @@
+language: python
+python:
+  - "2.6"
+  - "2.7"
+
+install:
+  - pip install  opencv-python opencv-contrib-python numpy matplotlib docopt
+
+script:
+  - python sample/test.py  -f sample/data/samplevideo.avi -c sample/data/camerapos.yml -d
+
+  
