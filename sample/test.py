@@ -53,7 +53,7 @@ if __name__=='__main__':
     # load camera matrix and distort matrix
     K = np.loadtxt("../calib_usb/K.csv",delimiter=",")
     dist_coef = np.loadtxt('../calib_usb/d.csv',delimiter=",")
-    vm = vmarker(markernum=5,K=K,dist=dist_coef,markerpos_file="data/roomA_ground_orig.csv")
+    vm = vmarker(markernum=5,K=K,dist=dist_coef,markerpos_file="data/roomA_ground_orig.csv",showimage=args["--display_image"])
 
     # 1. extract camera pose
     if args["--camerainformation"]: # has camera yaml file
@@ -114,8 +114,8 @@ if __name__=='__main__':
         plt.ylabel('y [m]')
         plt.show()
 
-    np.savetxt("pos2d.txt",np.array(pos2d))
-    np.savetxt("pos3d.txt",np.array(pos3d))
+        np.savetxt("pos2d.txt",np.array(pos2d))
+        np.savetxt("pos3d.txt",np.array(pos3d))
     
     print('Average and std')
     print(np.mean(np.array(pos3d).reshape(-1,2),axis=0))

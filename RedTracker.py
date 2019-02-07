@@ -11,6 +11,7 @@ class RedTracker:
         self.bboxsize = bboxsize
         self.refreshTHDtracker = 5  # the maximum acceptable center of mass position error
         self.pos = [] # tracked 2d point
+        self.showimage = showimage
 
         # if init with hand:
         if initialize_with_hand:
@@ -21,14 +22,14 @@ class RedTracker:
             self.bbox,_ = self.find_largest_redzone_rect(frame,bboxsize=self.bboxsize)
 
         # show rect
-        self.showrect(frame,waittime=0)
-        cv2.destroyAllWindows()
+        if self.showimage:
+            self.showrect(frame,waittime=0)
+            cv2.destroyAllWindows()
 
         # initialize tracker
         self.get_tracker(tracker)
         self.ok = self.boxtracker.init(frame, self.bbox)
 
-        self.showimage = showimage
 
     def get_tracker(self,name):
         """

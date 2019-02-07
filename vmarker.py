@@ -202,7 +202,7 @@ if __name__=='__main__':
                 break
             nframe = cv2.undistort(frame, K, dist_coef)
             tv = vm.getcamerapose(frame)
-            print(tv)
+            #print(tv)
             #print(vm.rvec) #euler angle
 
     except KeyboardInterrupt:

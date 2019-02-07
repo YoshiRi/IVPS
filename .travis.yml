@@ -5,10 +5,9 @@ python:
 install:
   - python setup.py install
   #- pip install yaml
-  
-services:
-  - xvfb
-  
+    
 script:
   - python vmarker.py  sample/data/samplevideo.avi 
+  - cd sample/
+  - python test.py  -f data/samplevideo.avi
 
