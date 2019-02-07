@@ -3,6 +3,7 @@ python:
   - "3.5"
 
 install:
+  - pip uninstall opencv-python
   - python setup.py install
   #- pip install  opencv-python opencv-contrib-python numpy matplotlib docopt
   
