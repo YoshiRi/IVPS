@@ -10,6 +10,5 @@ services:
   - xvfb
   
 script:
-  - xvfb-run make test
   - python vmarker.py  sample/data/samplevideo.avi 
 
