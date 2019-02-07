@@ -4,8 +4,9 @@ python:
 
 install:
   - python setup.py install
-  #- pip install  opencv-python opencv-contrib-python numpy matplotlib docopt
+  - pip install yaml
   
 script:
   - cd sample/
+  - cat data/camerapos.yml
   - python test.py  -f data/samplevideo.avi -c data/camerapos.yml
