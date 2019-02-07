@@ -11,7 +11,5 @@ services:
   
 script:
   - xvfb-run make test
-  - cd sample/
-  - cat data/camerapos.yml
-  - python test.py  -f data/samplevideo.avi #-c data/camerapos.yml
+  - python vmarker.py  sample/data/samplevideo.avi 
 

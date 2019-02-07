@@ -178,11 +178,16 @@ class vmarker:
         
 
 if __name__=='__main__':
-    cap = cv2.VideoCapture(0)
+    import sys
+    argv = sys.argv
+    if argv == 1:
+        cap = cv2.VideoCapture(0)
+    else:
+        cap = cv2.VideoCapture(argv[1])
     # load camera matrix and distort matrix
     K = np.loadtxt("calib_usb/K.csv",delimiter=",")
     dist_coef = np.loadtxt('calib_usb/d.csv',delimiter=",")
-    vm = vmarker(K=K,dist=dist_coef,markerpos_file="sample/markers1to4.csv")
+    vm = vmarker(K=K,dist=dist_coef,markerpos_file="sample/data/roomA_ground_orig.csv")
     try:
         while ~cap.isOpened():
             ok,frame = cap.read()
@@ -194,3 +199,5 @@ if __name__=='__main__':
     except KeyboardInterrupt:
         print("Finish Program!")
         exit(0)
+
+    exit(0)
