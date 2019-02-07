@@ -3,8 +3,9 @@ python:
   - "2.7"
 
 install:
-  - pip install  opencv-python opencv-contrib-python numpy matplotlib docopt
-
+  - python setup.py install
+  #- pip install  opencv-python opencv-contrib-python numpy matplotlib docopt
+  
 script:
   - cd sample/
   - python test.py  -f data/samplevideo.avi -c data/camerapos.yml -d
