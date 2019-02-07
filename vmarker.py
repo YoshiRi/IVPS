@@ -23,7 +23,7 @@ def detect_marker(frame):
     return dimage
 
 class vmarker:
-    def __init__(self,markernum=5,K=[],dist=[],markerpos_file="mpos1.csv"):
+    def __init__(self,markernum=5,K=[],dist=[],markerpos_file="mpos1.csv",showimage=1):
         aruco = cv2.aruco
         self.dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
         #self.startvideo()
@@ -39,6 +39,7 @@ class vmarker:
         self.detectparam = aruco.DetectorParameters_create()
         self.detectparam.adaptiveThreshConstant = 5.0
         self.detectparam.cornerRefinementMethod = 0
+        self.showimage = showimage
         #self.detectparam.minMarkerDistanceRate = 0.02
         #self.detectparam.errorCorrectionRate = 0.8
     
@@ -55,8 +56,9 @@ class vmarker:
         aruco = cv2.aruco
         corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, self.dictionary, parameters = self.detectparam)
         detect = aruco.drawDetectedMarkers(frame,corners)
-        cv2.imshow("detected",detect)
-        cv2.waitKey(1)
+        if self.showimage:
+            cv2.imshow("detected",detect)
+            cv2.waitKey(1)
     
     def load_camerapose_yml(self,file):
         try:
@@ -95,13 +97,15 @@ class vmarker:
             # Find the rotation and translation vectors.
             self.PNPsolved, self.rvecs, self.tvecs, inliers = cv2.solvePnPRansac(self.realcornerpos, self.ccorners, self.K, self.dist)
             self.hasCameraPose = True
-            self.drawaxis(aruco.drawDetectedMarkers(frame,corners,ids)) # draw origin
+            if self.showimage:
+                self.drawaxis(aruco.drawDetectedMarkers(frame,corners,ids)) # draw origin
             self.R,_ = cv2.Rodrigues(self.rvecs)
             return -np.dot(self.R.T,self.tvecs)
 
         else:
             if self.hasCameraPose:
-                self.drawaxis(frame)
+                if self.showimage:
+                    self.drawaxis(frame)
                 return -np.dot(self.R.T,self.tvecs)
             elif allow3pts and len(corners)==3:
                 # sort based on IDs and use center value
@@ -121,12 +125,14 @@ class vmarker:
                 # Find the rotation and translation vectors.
                 self.PNPsolved, self.rvecs, self.tvecs = cv2.solvePnP(self.realcornerpos, self.ccorners, self.K, self.dist, flags = cv2.SOLVEPNP_ITERATIVE, useExtrinsicGuess = 1,rvec=rvec_init,tvec=tvec_init)
                 self.hasCameraPose = True
-                self.drawaxis(aruco.drawDetectedMarkers(frame,corners,ids)) # draw origin
+                if self.showimage:
+                    self.drawaxis(aruco.drawDetectedMarkers(frame,corners,ids)) # draw origin
                 self.R,_ = cv2.Rodrigues(self.rvecs)
                 return -np.dot(self.R.T,self.tvecs)                
             else:
-                cv2.imshow('projected',aruco.drawDetectedMarkers(frame,corners,ids))
-                cv2.waitKey(1)
+                if self.showimage:
+                    cv2.imshow('projected',aruco.drawDetectedMarkers(frame,corners,ids))
+                    cv2.waitKey(1)
                 return []
 
     def draw(self,img, origin, imgpts):
@@ -187,10 +193,13 @@ if __name__=='__main__':
     # load camera matrix and distort matrix
     K = np.loadtxt("calib_usb/K.csv",delimiter=",")
     dist_coef = np.loadtxt('calib_usb/d.csv',delimiter=",")
-    vm = vmarker(K=K,dist=dist_coef,markerpos_file="sample/data/roomA_ground_orig.csv")
+    vm = vmarker(K=K,dist=dist_coef,markerpos_file="sample/data/roomA_ground_orig.csv",showimage=False)
     try:
-        while ~cap.isOpened():
+        while cap.isOpened():
             ok,frame = cap.read()
+            if not ok:
+                print("finish!")
+                break
             nframe = cv2.undistort(frame, K, dist_coef)
             tv = vm.getcamerapose(frame)
             print(tv)
