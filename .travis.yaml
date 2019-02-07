@@ -6,6 +6,5 @@ install:
   - pip install  opencv-python opencv-contrib-python numpy matplotlib docopt
 
 script:
-  - python sample/test.py  -f sample/data/samplevideo.avi -c sample/data/camerapos.yml -d
-
-  
+  - cd sample/
+  - python test.py  -f data/samplevideo.avi -c data/camerapos.yml -d
