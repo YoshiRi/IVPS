@@ -9,4 +9,4 @@ install:
 script:
   - cd sample/
   - cat data/camerapos.yml
-  - python test.py  -f data/samplevideo.avi -c data/camerapos.yml
+  - python test.py  -f data/samplevideo.avi #-c data/camerapos.yml
