@@ -2,6 +2,7 @@ from setuptools import setup, find_packages
 import sys
 
 sys.path.append('./calib_usb')
+sys.path.append('./sample')
 
 setup(
     name = 'IVPS',
