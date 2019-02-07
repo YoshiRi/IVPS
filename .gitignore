@@ -1,2 +1,4 @@
 *.avi
 !sample/data/samplevideo.avi
+
+*egg*
