@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/YoshiRi/IVPS.svg?branch=Development)](https://travis-ci.org/YoshiRi/IVPS)
+
 # IVPS
 Indoor Vision based Positioning System (Under Construction)
 
