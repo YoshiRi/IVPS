@@ -20,6 +20,12 @@ sys.path.append('../../')
 from RedTracker import *
 from vmarker import *
 
+def finishtest():
+    out1.release()
+    out2.release()
+    cv2.destroyAllWindows()
+    exit(0)
+
 '''
 main callback
 
@@ -51,6 +57,7 @@ def callback(limg, rimg, info, depth):
         print("Init marker program")
         vml = vmarker(K=K,dist=D,markerpos_file="roomA_ground_orig.csv")
         vmr = vmarker(K=K,dist=D,markerpos_file="roomA_ground_orig.csv")
+        print(dimg)
 
     # tracker initialize
     if not('ltrack' in globals()):
@@ -59,16 +66,35 @@ def callback(limg, rimg, info, depth):
         rtrack = RedTracker(rimg_fix.copy(),showimage=1,initialize_with_hand=1)
         
         # save parameter
-        np.savetxt("vm_K.csv",K,delimeter=',')
-        np.savetxt("vm_D.csv",D,delimeter=',')
+        np.savetxt("vm_K.csv",K,delimiter=',')
+        np.savetxt("vm_D.csv",D,delimiter=',')
+        np.savetxt("dimage.csv",dimg,delimiter=',')
         
-    ltrack.track(limg_fix)
-    rtrack.track(rimg_fix)
+        
+    out1.write(limg_fix)
+    out2.write(rimg_fix)
     
-    k = cv2.waitKey(1)
-    if k == 27 :
-        exit(0)
+    #ltrack.track(limg_fix)
+    #rtrack.track(rimg_fix)
     
+    #pos=ltrack.getpos()
+    #print(pos)
+    #print(dimg(int(pos[1]),int(pos[0])))
+    sys.stdout.flush()
+    
+    try:
+        k = cv2.waitKey(1)
+        if k == 27 :
+            finish()
+    except KeyboardInterrupt:
+        finish()
+    
+
+
+# Define the codec and create VideoWriter object
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out1 = cv2.VideoWriter('loutput.avi',fourcc, 30.0, (1280,720))
+out2 = cv2.VideoWriter('routput_.avi',fourcc, 30.0, (1280,720))
 
 
 def main():
