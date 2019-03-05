@@ -58,6 +58,13 @@ def callback(limg, rimg, info, depth):
         vml = vmarker(K=K,dist=D,markerpos_file="roomA_ground_orig.csv")
         vmr = vmarker(K=K,dist=D,markerpos_file="roomA_ground_orig.csv")
         print(dimg)
+        
+        # save parameter
+        np.savetxt("vm_K.csv",K,delimiter=',')
+        np.savetxt("vm_D.csv",D,delimiter=',')
+        np.savetxt("dimage.csv",dimg,delimiter=',')
+        cv2.imwrite("limage.png",limg_fix)
+        cv2.imwrite("rimage.png",rimg_fix)
 
     # tracker initialize
     if not('ltrack' in globals()):
@@ -65,10 +72,7 @@ def callback(limg, rimg, info, depth):
         ltrack = RedTracker(limg_fix.copy(),showimage=1,initialize_with_hand=1)
         rtrack = RedTracker(rimg_fix.copy(),showimage=1,initialize_with_hand=1)
         
-        # save parameter
-        np.savetxt("vm_K.csv",K,delimiter=',')
-        np.savetxt("vm_D.csv",D,delimiter=',')
-        np.savetxt("dimage.csv",dimg,delimiter=',')
+
         
         
     out1.write(limg_fix)
