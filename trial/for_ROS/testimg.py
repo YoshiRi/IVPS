@@ -55,4 +55,17 @@ print(tc_g+np.dot(Rc.T,to_c))
 # proposed method 1
 
 print("Proposed Method")
-print(vm.getobjpose_1(pos,0.12))
+print(vm.getobjpose_1(pos,0.085))
+
+
+rect = cv2.selectROI(img, False)
+crop=tracker.extractROI(img,rect)
+dcrop=tracker.extractROI(depth,rect)
+dcrop2 = dcrop/np.amax(dcrop)*255.0
+dcrop2 = cv2.normalize(dcrop, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+cv2.imshow("crop",crop)
+cv2.imshow("dcrop",dcrop2)
+cv2.waitKey(0)
+
+cv2.imwrite("figures/crop.png",crop)
+cv2.imwrite("figures/crop_depth.png",dcrop2)
