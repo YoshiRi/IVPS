@@ -17,9 +17,10 @@ img = cv2.imread("limage.png")
 K = np.loadtxt("vm_K.csv",delimiter=",").reshape(3,3)
 dist_coef = np.loadtxt('vm_D.csv',delimiter=",")
 vm = vmarker(K=K,dist=dist_coef,markerpos_file="roomA_ground_orig.csv")
-tc_g = vm.getcamerapose(img.copy())
+showimg = img.copy()
+tc_g = vm.getcamerapose(showimg)
 
-
+'''
 # redtracker
 tracker = RedTracker(img.copy(),showimage=1,initialize_with_hand=1)
 tracker.track(img)
@@ -57,8 +58,26 @@ print(tc_g+np.dot(Rc.T,to_c))
 print("Proposed Method")
 print(vm.getobjpose_1(pos,0.085))
 
+'''
+
+'''
+[[ 2.63469052  2.63568878]
+ [ 2.63287401  2.6329    ]]
+Stereo Based Method
+[[ 0.05990568]
+ [-0.02124139]
+ [ 0.13482995]]
+Proposed Method
+[0.00079239195965262466, 0.00085919515168742368]
+'''
+
+
+
 
 rect = cv2.selectROI(img, False)
+vm.showmarker(showimg)
+crop_axis = tracker.extractROI(showimg,rect)
+
 crop=tracker.extractROI(img,rect)
 dcrop=tracker.extractROI(depth,rect)
 dcrop2 = dcrop/np.amax(dcrop)*255.0
@@ -67,5 +86,6 @@ cv2.imshow("crop",crop)
 cv2.imshow("dcrop",dcrop2)
 cv2.waitKey(0)
 
+cv2.imwrite("figures/crop_axis.png",crop_axis)
 cv2.imwrite("figures/crop.png",crop)
 cv2.imwrite("figures/crop_depth.png",dcrop2)
