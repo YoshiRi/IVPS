@@ -15,7 +15,10 @@ class RedTracker:
         # if init with hand:
         if initialize_with_hand:
             rect = cv2.selectROI(frame, False)
-            self.bbox = (rect[0]+rect[2]/2-self.bboxsize/2,rect[1]+rect[3]/2-self.bboxsize/2,self.bboxsize,self.bboxsize)
+            roirect = self.extractROI(frame,rect)
+            _,crois,_,_ = self.extractRed(roirect)
+            #self.bbox = (rect[0]+rect[2]/2-self.bboxsize/2,rect[1]+rect[3]/2-self.bboxsize/2,self.bboxsize,self.bboxsize)
+            self.bbox = (crois[0]+rect[0]-self.bboxsize/2,crois[1]+rect[1]-self.bboxsize/2,self.bboxsize,self.bboxsize)
             cv2.destroyAllWindows()
         else:   # if init automatically
             self.bbox,_ = self.find_largest_redzone_rect(frame,bboxsize=self.bboxsize)
@@ -164,7 +167,8 @@ if __name__ == '__main__':
         
         # show FPS
         fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
-        print("FPS: "+str(fps),flush=True)
+        print("FPS: "+str(fps))
+        
 
         k = cv2.waitKey(1)
         if k == 27 :
