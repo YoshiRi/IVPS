@@ -34,6 +34,7 @@ extract position
 def callback(limg, rimg, info, depth):
     print("In the call back")
     sys.stdout.flush()
+    global rimgs,limgs,dimgs,vml,vmr,ltrack,rtrack
     
     # try to get image
     try:
@@ -68,31 +69,22 @@ def callback(limg, rimg, info, depth):
     # tracker initialize
     if not('ltrack' in globals()):
         print("Init tracker program")
-        ltrack = RedTracker(limg_fix.copy(),showimage=0,initialize_with_hand=1,bboxsize=36)
-        rtrack = RedTracker(rimg_fix.copy(),showimage=0,initialize_with_hand=1,bboxsize=36)
+        ltrack = RedTracker(limg_fix.copy(),showimage=1,initialize_with_hand=1)
+        rtrack = RedTracker(rimg_fix.copy(),showimage=1,initialize_with_hand=1)
         
-    
+
         
-    ## for saving videos    
-    #out1.write(limg_fix)
-    #out2.write(rimg_fix)
+        
+    out1.write(limg_fix)
+    out2.write(rimg_fix)
     
-    draw = limg_fix.copy()
-
-    ## tracking
-    ltrack.track(draw)
-
-    ## get camera pose
-    vml.getcamerapose(draw)
-    
-    vml.drawaxis(draw)
-    cv2.imshow("pose and track",ltrack.drawrect(draw,ltrack.bbox))
-    
+    #ltrack.track(limg_fix)
+    #rtrack.track(rimg_fix)
     
     #pos=ltrack.getpos()
     #print(pos)
     #print(dimg(int(pos[1]),int(pos[0])))
-    #sys.stdout.flush()
+    sys.stdout.flush()
     
     try:
         k = cv2.waitKey(1)
@@ -102,16 +94,14 @@ def callback(limg, rimg, info, depth):
         finish()
     
 
-## for video record 
+
 # Define the codec and create VideoWriter object
-#fourcc = cv2.VideoWriter_fourcc(*'XVID')
-#out1 = cv2.VideoWriter('loutput.avi',fourcc, 30.0, (1280,720))
-#out2 = cv2.VideoWriter('routput_.avi',fourcc, 30.0, (1280,720))
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out1 = cv2.VideoWriter('loutput.avi',fourcc, 30.0, (1280,720))
+out2 = cv2.VideoWriter('routput_.avi',fourcc, 30.0, (1280,720))
 
 
 def main():
-    global rimgs,limgs,dimgs,vml,vmr,ltrack,rtrack
-
 
     print("Initialization ...")
     rospy.init_node('zed_vm', anonymous=True)
