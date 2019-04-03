@@ -77,23 +77,22 @@ class vmarker:
         corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, self.dictionary, parameters = self.detectparam)
         self.PNPsolved = False
         
-        # if corner number is larger than 3
-        if len(corners) >= 4:
             # sort based on IDs and use center value
-            centercorners = []
-            geometrypositions = []
-            matched = 0
-            for id_,corner in sorted(zip(ids,corners)): #corner=[x11,y11]...
-                if id_ > self.mnum:
-                    break
-                matched += 1
-                centercorners.append(np.average(corner,1))
-                geometrypositions.append(self.objp[id_])
-                
-            self.ccorners = np.array(centercorners).reshape(matched,1,2)
-            self.realcornerpos = np.array(geometrypositions).reshape(matched,3)
+        centercorners = []
+        geometrypositions = []
+        matched = 0
+        for id_,corner in sorted(zip(ids,corners)): #corner=[x11,y11]...
+            if id_ > self.mnum:
+                break
+            matched += 1
+            centercorners.append(np.average(corner,1))
+            geometrypositions.append(self.objp[id_])
+        self.ccorners = np.array(centercorners).reshape(matched,1,2)
+        self.realcornerpos = np.array(geometrypositions).reshape(matched,3)
             #print(self.ccorners)
-
+            
+        # if corner number is larger than 3
+        if matched >= 4:            
             # Find the rotation and translation vectors.
             self.PNPsolved, self.rvecs, self.tvecs, inliers = cv2.solvePnPRansac(self.realcornerpos, self.ccorners, self.K, self.dist)
             self.hasCameraPose = True
@@ -107,18 +106,8 @@ class vmarker:
                 if self.showimage:
                     self.drawaxis(frame)
                 return -np.dot(self.R.T,self.tvecs)
-            elif allow3pts and len(corners)==3:
-                # sort based on IDs and use center value
-                centercorners = []
-                geometrypositions = []
-                for id_,corner in sorted(zip(ids,corners)): #corner=[x11,y11]...
-                    centercorners.append(np.average(corner,1))
-                    geometrypositions.append(self.objp[id_])
-                    
-                self.ccorners = np.array(centercorners).reshape(len(ids),1,2)
-                self.realcornerpos = np.array(geometrypositions).reshape(len(ids),3)
-                #print(self.ccorners)
-                
+            elif allow3pts and matched==3:
+                # sort based on IDs and use center value                
                 rvec_init = np.float32(rvec_init).reshape(3,1)
                 tvec_init = np.float32(tvec_init).reshape(3,1)
                 
