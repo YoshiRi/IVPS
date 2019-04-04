@@ -36,13 +36,16 @@ class RedTracker:
     def get_tracker(self,name):
         """
         Choose tracker from key word
+        see here : https://www.pyimagesearch.com/2018/07/30/opencv-object-tracking/
         """
         self.boxtracker = {
             'Boosting': cv2.TrackerBoosting_create(),
             'MIL': cv2.TrackerMIL_create(),
-            'KCF' : cv2.TrackerKCF_create(),
+            'KCF' : cv2.TrackerKCF_create(),# Opencv Reccomendation
             'TLD' : cv2.TrackerTLD_create(),
-            'MedianFlow' : cv2.TrackerMedianFlow_create()
+            'MedianFlow' : cv2.TrackerMedianFlow_create(), # Fast but has drift
+            'MOSSE': cv2.TrackerMOSSE_create(), # Super fast template need to be big
+            'GOTURN': cv2.TrackerGOTURN_create() # super slow but accurate: not working in current version
         }.get(name, 0)        
 
     def extractROI(self,frame,roi):
@@ -81,6 +84,10 @@ class RedTracker:
 
         else:
             print("Failed to track!")
+            if self.showimage:
+                cv2.imshow("tracked", self.drawrect(frame.copy(),self.bbox))
+                cv2.waitKey(1)
+
 
     def getpos(self):
         return self.pos
