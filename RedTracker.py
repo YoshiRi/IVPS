@@ -127,7 +127,20 @@ class RedTracker:
         validnum = sum(mask.reshape(-1))/255
         hei,wid,_ = image.shape
 
-        Mmt = cv2.moments(mask)
+
+        # Get boundary
+        _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        rects = []
+        
+        for contour in contours:
+            approx = cv2.convexHull(contour)
+            rect = cv2.boundingRect(approx)
+            rects.append(np.array(rect))
+        largest = max(rects, key=(lambda x: x[2] * x[3])) #return maximum rectangle
+
+        extracted_mask = self.extractROI(mask,largest)
+
+        Mmt = cv2.moments(extracted_mask)
         if Mmt["m00"] != 0:
             cx = Mmt['m10']/Mmt['m00']
             cy = Mmt['m01']/Mmt['m00']
@@ -136,7 +149,7 @@ class RedTracker:
             cx,cy = wid/2,hei/2
             flag = False
         #print([cx,cy])
-        return mask,[cx,cy],flag,validnum
+        return mask,[cx+largest[0],cy+largest[1]],flag,validnum
 
 
 
