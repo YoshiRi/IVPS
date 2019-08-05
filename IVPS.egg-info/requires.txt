@@ -1,0 +1,4 @@
+numpy
+opencv-contrib-python==3.4.0.12
+docopt
+matplotlib
